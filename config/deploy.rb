@@ -5,23 +5,29 @@ set :application, 'isucon4'
 set :repo_url, 'git@github.com:a-suenami/isucon3-practice.git'
 set :deploy_to, '/home/isucon/production'
 
-set :unicorn_conf, "#{deploy_to}/current/unicorn_config.rb"
-set :unicorn_pid, "#{deploy_to}/shared/pids/unicorn.pid"
+set :unicorn_conf, "#{fetch(:deploy_to)}/current/unicorn_config.rb"
+set :unicorn_pid, "#{fetch(:deploy_to)}/shared/pids/unicorn.pid"
 
 after 'deploy:publishing', 'deploy:restart'
 
 namespace :deploy do
  
   task :restart do
-    run "if [ -f #{unicorn_pid} ]; then kill -USR2 `cat #{unicorn_pid}`; else cd #{current_path} && bundle exec unicorn -c #{unicorn_conf} -E #{rack_env} -D; fi"
+    on roles :all do
+      execute "if [ -f #{fetch(:unicorn_pid)} ]; then kill -USR2 `cat #{fetch(:unicorn_pid)}`; else cd #{fetch(:current_path)} && bundle exec unicorn -c #{fetch(:unicorn_conf)} -E #{fetch(:rack_env)} -D; fi"
+    end
   end
  
   task :start do
-    run "cd #{current_path} && bundle exec unicorn -c #{unicorn_conf} -E #{rack_env} -D"
+    on roles :all do
+      execute "cd #{fetch(:deploy_to)}/current && bundle exec unicorn -c #{fetch(:unicorn_conf)} -E #{fetch(:rack_env)} -D"
+    end
   end
  
   task :stop do
-    run "if [ -f #{unicorn_pid} ]; then kill -QUIT `cat #{unicorn_pid}`; fi"
+    on roles :all do
+      execute "if [ -f #{fetch(:unicorn_pid)} ]; then kill -QUIT `cat #{fetch(:unicorn_pid)}`; fi"
+    end
   end
  
 end
