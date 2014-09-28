@@ -3,10 +3,12 @@ lock '3.2.1'
 
 set :application, 'isucon4'
 set :repo_url, 'git@github.com:a-suenami/isucon3-practice.git'
-set :deploy_to, '/home/isucon/webapp/ruby'
+set :deploy_to, '/home/isucon/production'
 
 set :unicorn_conf, "#{deploy_to}/current/unicorn_config.rb"
 set :unicorn_pid, "#{deploy_to}/shared/pids/unicorn.pid"
+
+after 'deploy:publishing', 'deploy:restart'
 
 namespace :deploy do
  
